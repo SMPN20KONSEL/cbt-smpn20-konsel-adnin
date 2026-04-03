@@ -1,7 +1,7 @@
 import { auth, db } from "./firebase.js";
 import { signInWithEmailAndPassword } 
   from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
-import { doc, getDoc } 
+import { doc, getDoc, setDoc, serverTimestamp } 
   from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const emailInput = document.getElementById("email");
@@ -23,31 +23,38 @@ loginBtn.onclick = async () => {
       return;
     }
 
-    // LOGIN AUTH
+    // 1️⃣ LOGIN AUTH
     const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const uid = userCred.user.uid; // <-- FIX: ambil UID
+    const uid = userCred.user.uid;
 
-    // AMBIL DATA USER
+    // 2️⃣ CEK USER DI FIRESTORE
     const userRef = doc(db, "users", uid);
     const snap = await getDoc(userRef);
 
+    // 3️⃣ AUTO CREATE JIKA BELUM ADA
     if (!snap.exists()) {
-      error.innerText = "Akun tidak terdaftar di database";
-      return;
+      await setDoc(userRef, {
+        email: userCred.user.email,
+        role: roleDipilih,
+        createdAt: serverTimestamp()
+      });
     }
 
-    const roleDB = snap.data().role;
+    const roleDB = snap.exists()
+      ? snap.data().role
+      : roleDipilih;
 
+    // 4️⃣ VALIDASI ROLE
     if (roleDB !== roleDipilih) {
       error.innerText = "Role tidak sesuai";
       return;
     }
 
-    // SIMPAN SESSION
+    // 5️⃣ SIMPAN SESSION
     sessionStorage.setItem("uid", uid);
     sessionStorage.setItem("role", roleDB);
 
-    // REDIRECT KE DASHBOARD SESUAI ROLE
+    // 6️⃣ REDIRECT
     if (roleDB === "admin") {
       window.location.href = "admin/dashboard.html";
     } else if (roleDB === "guru") {
