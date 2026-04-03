@@ -4,6 +4,7 @@ import { collection, getDocs }
 
 const list = document.getElementById("list");
 const filterMapel = document.getElementById("filterMapel");
+const filterJudul = document.getElementById("filterJudul");
 const filterKelas = document.getElementById("filterKelas");
 const btnFilter = document.getElementById("btnFilter");
 const btnReset = document.getElementById("btnReset");
@@ -18,16 +19,17 @@ async function loadNilai() {
   list.innerHTML = "";
   filterMapel.innerHTML = `<option value="">Semua Mapel</option>`;
   filterKelas.innerHTML = `<option value="">Semua Kelas</option>`;
-
+filterJudul.innerHTML = `<option value="">Semua Judul</option>`;
   const snap = await getDocs(collection(db, "jawaban_siswa"));
 
   const mapelSet = new Set();
   const kelasSet = new Set();
+  const judulSet = new Set();
 
   snap.forEach(docSnap => {
     const d = docSnap.data();
     semuaNilai.push(d);
-
+    if (d.judulUjian) judulSet.add(d.judulUjian);
     if (d.mapel) mapelSet.add(d.mapel);
     if (d.kelas) kelasSet.add(d.kelas);
   });
@@ -38,6 +40,9 @@ async function loadNilai() {
 
   kelasSet.forEach(k => {
     filterKelas.innerHTML += `<option value="${k}">${k}</option>`;
+  });
+  judulSet.forEach(j => {
+    filterJudul.innerHTML += `<option value="${j}">${j}</option>`;
   });
 
   tampilkan(semuaNilai);
@@ -83,10 +88,12 @@ function tampilkan(data) {
 btnFilter.onclick = () => {
   const mapel = filterMapel.value;
   const kelas = filterKelas.value;
+  const judul = filterJudul.value; // 🔥 tambah
 
   const hasil = semuaNilai.filter(n =>
     (!mapel || n.mapel === mapel) &&
-    (!kelas || n.kelas === kelas)
+    (!kelas || n.kelas === kelas) &&
+    (!judul || n.judulUjian === judul) // 🔥 filter judul
   );
 
   tampilkan(hasil);
@@ -96,6 +103,7 @@ btnFilter.onclick = () => {
 btnReset.onclick = () => {
   filterMapel.value = "";
   filterKelas.value = "";
+  filterJudul.value = ""; // 🔥 reset juga
   tampilkan(semuaNilai);
 };
 
