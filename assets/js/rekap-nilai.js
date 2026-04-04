@@ -59,9 +59,45 @@ function tampilkan(data) {
     return;
   }
 
+  // ✅ SORT berdasarkan waktu_mulai terbaru
+  data.sort((a, b) => {
+    if (!a.waktu_mulai || !b.waktu_mulai) return 0;
+    return b.waktu_mulai.seconds - a.waktu_mulai.seconds;
+  });
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  let lastTanggal = "";
   let total = 0;
 
   data.forEach((n, i) => {
+    if (!n.waktu_mulai) return;
+
+    const tgl = n.waktu_mulai.toDate();
+    const tglOnly = new Date(tgl);
+    tglOnly.setHours(0,0,0,0);
+
+    const formatTanggal = tglOnly.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+    const isToday = tglOnly.getTime() === today.getTime();
+
+    // ✅ tampilkan header tanggal (selain hari ini)
+    if (!isToday && lastTanggal !== formatTanggal) {
+      list.innerHTML += `
+        <tr>
+          <td colspan="8" style="font-weight:bold; background:#f5f5f5;">
+            ${formatTanggal}
+          </td>
+        </tr>
+      `;
+      lastTanggal = formatTanggal;
+    }
+
     const pg = Number(n.nilaiPG || 0);
     const essay = Number(n.nilaiEssay || 0);
     const totalNilai = Number(n.nilaiTotal || 0);
