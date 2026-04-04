@@ -5,15 +5,17 @@ import {
   doc,
   getDoc,
   setDoc,
-  addDoc,
   serverTimestamp,
   query,
-  where
+  where,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
 const soalSelect = document.getElementById("soalSelect");
 const list = document.getElementById("list");
 const btnBuat = document.getElementById("btnBuat");
+
+let loadingToggle = false;
 
 /* ================= GENERATE KODE ================= */
 function generateKode() {
@@ -48,16 +50,17 @@ async function buatUjian() {
 
     // 🔒 CEK AGAR BANK SOAL TIDAK DIPAKAI DOBEL
     const cek = await getDocs(
-      query(
-        collection(db, "jadwal_ujian"),
-        where("bankSoalId", "==", bankSoalId)
-      )
-    );
+  query(
+    collection(db, "jadwal_ujian"),
+    where("bankSoalId", "==", bankSoalId),
+    where("aktif", "==", true) // 🔥 hanya cek yang aktif
+  )
+);
 
-    if (!cek.empty) {
-      alert("❌ Jadwal ujian untuk bank soal ini sudah ada");
-      return;
-    }
+if (!cek.empty) {
+  alert("❌ Masih ada jadwal AKTIF untuk bank soal ini");
+  return;
+}
 
     // Ambil data bank soal
     const soalSnap = await getDoc(doc(db, "bank_soal", bankSoalId));
@@ -69,7 +72,7 @@ async function buatUjian() {
     const s = soalSnap.data();
     const kode = generateKode();
 
-    // 1️⃣ SIMPAN JADWAL (ID DOKUMEN = KODE UJIAN)
+    // SIMPAN JADWAL
     await setDoc(doc(db, "jadwal_ujian", kode), {
       bankSoalId,
       judul: s.judul,
@@ -80,14 +83,48 @@ async function buatUjian() {
       aktif: true,
       createdAt: serverTimestamp()
     });
+
     alert(`✅ Jadwal ujian berhasil dibuat\nKode Ujian: ${kode}`);
     loadJadwal();
 
   } catch (err) {
-    console.error("ERROR BUAT UJIAN:", err);
+    console.error(err);
     alert("❌ Gagal membuat jadwal\n" + err.message);
   }
 }
+
+/* ================= TOGGLE STATUS ================= */
+async function toggleStatus(kode, statusSekarang) {
+  if (loadingToggle) return;
+  loadingToggle = true;
+
+  const konfirmasi = confirm(
+    statusSekarang
+      ? "Nonaktifkan jadwal ini?"
+      : "Aktifkan kembali jadwal ini?"
+  );
+
+  if (!konfirmasi) {
+    loadingToggle = false;
+    return;
+  }
+
+  try {
+    await updateDoc(doc(db, "jadwal_ujian", kode), {
+      aktif: !statusSekarang
+    });
+
+    loadJadwal();
+  } catch (err) {
+    alert("❌ Gagal update status");
+    console.error(err);
+  }
+
+  loadingToggle = false;
+}
+
+// 👉 WAJIB untuk onclick HTML
+window.toggleStatus = toggleStatus;
 
 /* ================= LOAD JADWAL ================= */
 async function loadJadwal() {
@@ -95,27 +132,26 @@ async function loadJadwal() {
 
   const snap = await getDocs(collection(db, "jadwal_ujian"));
 
-  // 👉 ubah ke array dulu biar bisa di-sort
   const data = [];
   snap.forEach(d => data.push(d.data()));
 
-  // 👉 urutkan berdasarkan tanggal terbaru
+  // SORT TERBARU
   data.sort((a, b) => {
     if (!a.createdAt || !b.createdAt) return 0;
     return b.createdAt.seconds - a.createdAt.seconds;
   });
 
   const today = new Date();
-  today.setHours(0,0,0,0);
+  today.setHours(0, 0, 0, 0);
 
   let lastTanggal = "";
 
   data.forEach(u => {
-    if (!u.createdAt) return; // skip kalau belum ada timestamp
+    if (!u.createdAt) return;
 
     const tgl = u.createdAt.toDate();
     const tglOnly = new Date(tgl);
-    tglOnly.setHours(0,0,0,0);
+    tglOnly.setHours(0, 0, 0, 0);
 
     const formatTanggal = tglOnly.toLocaleDateString("id-ID", {
       day: "numeric",
@@ -125,7 +161,7 @@ async function loadJadwal() {
 
     const isToday = tglOnly.getTime() === today.getTime();
 
-    // ✅ tampilkan tanggal hanya kalau bukan hari ini
+    // HEADER TANGGAL (selain hari ini)
     if (!isToday && lastTanggal !== formatTanggal) {
       list.innerHTML += `
         <tr>
@@ -137,7 +173,7 @@ async function loadJadwal() {
       lastTanggal = formatTanggal;
     }
 
-    // ✅ tampilkan data
+    // ROW DATA
     list.innerHTML += `
       <tr>
         <td>${u.judul}</td>
@@ -145,7 +181,19 @@ async function loadJadwal() {
         <td>${u.kelas}</td>
         <td><b>${u.kode}</b></td>
         <td>${u.durasi} menit</td>
-        <td>${u.aktif ? "Aktif" : "Nonaktif"}</td>
+        <td 
+          style="
+            cursor:pointer;
+            color:white;
+            background:${u.aktif ? 'green' : 'red'};
+            text-align:center;
+            border-radius:6px;
+            padding:4px;
+          "
+          onclick="toggleStatus('${u.kode}', ${u.aktif})"
+        >
+          ${u.aktif ? "Aktif" : "Nonaktif"}
+        </td>
       </tr>
     `;
   });
