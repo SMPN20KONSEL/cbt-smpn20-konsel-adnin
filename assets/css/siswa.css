@@ -1,0 +1,42 @@
+.split-card {
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+}
+.card {
+  position: relative;
+}
+
+.total-siswa {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  font-size: 12px;
+}
+.split-card .left,
+.split-card .right {
+  width: 50%;
+}
+
+.split-card input {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.total-siswa {
+  display: block;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 5px;
+}
+/* Responsive biar HP tetap bagus */
+@media (max-width: 768px) {
+  .split-card {
+    flex-direction: column;
+  }
+
+  .split-card .left,
+  .split-card .right {
+    width: 100%;
+  }
+}

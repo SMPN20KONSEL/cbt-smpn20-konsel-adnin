@@ -43,7 +43,10 @@ function setLoading(el, state) {
   el.disabled = state;
   el.innerHTML = state ? "⏳ Proses..." : el.dataset.label;
 }
-
+function updateTotalSiswa(data) {
+  document.getElementById("totalSiswa").innerText =
+    "Total: " + data.length + " siswa";
+}
 /* ===============================
    AKTIFKAN AKUN SISWA
 ================================ */
@@ -178,35 +181,39 @@ window.importSiswa = async () => {
 function tampilkanSiswa(data) {
   list.innerHTML = "";
 
-  data
+  const filtered = data
     .filter(s => !s.deletedAt || s.aktif)
-    .sort((a, b) => a.nama.localeCompare(b.nama))
-    .forEach((s, i) => {
-      list.innerHTML += `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${s.nama}</td>
-          <td>${s.nis}</td>
-          <td>${s.kelas}</td>
-          <td>${s.email}</td>
-          <td>${s.password}</td>
-          <td>${s.aktif ? "✅ Aktif" : "❌ Nonaktif"}</td>
-          <td>
-            ${
-              s.aktif
-              ? `<button data-label="Nonaktifkan"
-                    onclick="nonaktifkanAkun('${s.nis}', this)">
-                    Nonaktifkan
-                 </button>`
-              : `<button data-label="Aktifkan"
-                    onclick="aktifkanAkun('${s.nis}', this)">
-                    Aktifkan
-                 </button>`
-            }
-          </td>
-        </tr>
-      `;
-    });
+    .sort((a, b) => a.nama.localeCompare(b.nama));
+
+  // 🔥 UPDATE TOTAL
+  updateTotalSiswa(filtered);
+
+  filtered.forEach((s, i) => {
+    list.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${s.nama}</td>
+        <td>${s.nis}</td>
+        <td>${s.kelas}</td>
+        <td>${s.email}</td>
+        <td>${s.password}</td>
+        <td>${s.aktif ? "✅ Aktif" : "❌ Nonaktif"}</td>
+        <td>
+          ${
+            s.aktif
+            ? `<button data-label="Nonaktifkan"
+                  onclick="nonaktifkanAkun('${s.nis}', this)">
+                  Nonaktifkan
+               </button>`
+            : `<button data-label="Aktifkan"
+                  onclick="aktifkanAkun('${s.nis}', this)">
+                  Aktifkan
+               </button>`
+          }
+        </td>
+      </tr>
+    `;
+  });
 }
 
 /* ===============================

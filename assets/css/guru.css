@@ -45,7 +45,15 @@
   color: #1f3c88;
   font-weight: 600;
 }
-
+.total-guru {
+  display: inline-block;
+  background: #3b82f6;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 8px;
+}
 /* ===============================
    FORM TAMBAH GURU
 ================================ */

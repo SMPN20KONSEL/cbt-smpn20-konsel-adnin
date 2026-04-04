@@ -79,8 +79,6 @@ function stopLoading(btn) {
   btn.disabled = false;
   btn.innerHTML = btn.dataset.text;
 }
-
-
 // ======================================================
 // ===================== TAMBAH SOAL ====================
 // ======================================================
@@ -103,9 +101,14 @@ window.tambahSoal = (data = null) => {
     ${data?.gambar ? `<img src="${data.gambar}" style="max-width:100%;margin:10px 0">` : ""}
 
     <div class="pg-options" style="margin-top:8px">
-      ${["A","B","C","D"].map(l => `
-        <div><b>${l}.</b> <span contenteditable class="opsi-input"></span></div>
-      `).join("")}
+     ${["A","B","C","D"].map(l => `
+  <div style="display:flex; align-items:center; margin-bottom:6px;">
+    <b style="width:25px;">${l}.</b>
+    <span contenteditable class="opsi-input"
+      style="flex:1; border:1px solid #ccc; padding:6px; border-radius:6px; min-height:30px;">
+    </span>
+  </div>
+`).join("")}
 
       <select class="jawaban">
         <option value="">Kunci Jawaban</option>
@@ -113,7 +116,16 @@ window.tambahSoal = (data = null) => {
       </select>
     </div>
 
-    <button type="button" onclick="this.parentElement.remove()">🗑 Hapus Soal</button>
+    <!-- ✅ TOMBOL BARU -->
+    <div style="margin-top:10px; display:flex; gap:10px;">
+      <button type="button" onclick="tambahSoalDiBawah(this)">
+        ➕ Tambah
+      </button>
+
+      <button type="button" onclick="this.closest('.soal-card').remove()">
+        🗑 Hapus
+      </button>
+    </div>
   `;
 
   daftarSoal.appendChild(card);
@@ -138,6 +150,69 @@ window.tambahSoal = (data = null) => {
       card.querySelector(".jawaban").value = data.jawabanBenar || "";
     }
   }
+
+  tipe.dispatchEvent(new Event("change"));
+};
+
+
+
+// ======================================================
+// ================= TAMBAH DI BAWAH ====================
+// ======================================================
+window.tambahSoalDiBawah = (btn) => {
+  const cardLama = btn.closest(".soal-card");
+
+  const cardBaru = document.createElement("div");
+  cardBaru.className = "soal-card";
+  cardBaru.style.border = "1px solid #ccc";
+  cardBaru.style.padding = "15px";
+  cardBaru.style.marginBottom = "15px";
+  cardBaru.style.borderRadius = "10px";
+
+  cardBaru.innerHTML = `
+    <select class="tipe-soal">
+      <option value="pg">Pilihan Ganda</option>
+      <option value="esai">Esai</option>
+    </select>
+
+    <div class="pertanyaan" contenteditable style="margin-top:8px"></div>
+
+    <div class="pg-options" style="margin-top:8px">
+${["A","B","C","D"].map(l => `
+  <div style="display:flex; align-items:center; margin-bottom:6px;">
+    <b style="width:25px;">${l}.</b>
+    <span contenteditable class="opsi-input"
+      style="flex:1; border:1px solid #ccc; padding:6px; border-radius:6px; min-height:30px;">
+    </span>
+  </div>
+`).join("")}
+
+      <select class="jawaban">
+        <option value="">Kunci Jawaban</option>
+        ${["A","B","C","D"].map(l => `<option>${l}</option>`).join("")}
+      </select>
+    </div>
+
+    <div style="margin-top:10px; display:flex; gap:10px;">
+      <button type="button" onclick="tambahSoalDiBawah(this)">
+        ➕ Tambah
+      </button>
+
+      <button type="button" onclick="this.closest('.soal-card').remove()">
+        🗑 Hapus
+      </button>
+    </div>
+  `;
+
+  // 🔥 INTI: muncul tepat di bawah
+  cardLama.after(cardBaru);
+
+  const tipe  = cardBaru.querySelector(".tipe-soal");
+  const pgBox = cardBaru.querySelector(".pg-options");
+
+  tipe.onchange = () => {
+    pgBox.style.display = tipe.value === "pg" ? "block" : "none";
+  };
 
   tipe.dispatchEvent(new Event("change"));
 };

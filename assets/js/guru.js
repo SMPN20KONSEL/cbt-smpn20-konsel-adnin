@@ -44,14 +44,11 @@ function setLoading(btn, state) {
   if (!btn) return;
 
   const text = document.getElementById("textBtn");
-
   btn.disabled = state;
 
-  if (state) {
-    text.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Proses...';
-  } else {
-    text.innerHTML = 'Tambah Guru';
-  }
+  text.innerHTML = state
+    ? '<i class="fa fa-spinner fa-spin"></i> Proses...'
+    : 'Tambah Guru';
 }
 
 /* ===============================
@@ -66,26 +63,11 @@ function formatMapel(text) {
 }
 
 /* ===============================
-   GELAR MAP
-================================ */
-const GELAR_MAP = {
-  spd: "S.Pd",
-  spdi: "S.Pd.I",
-  mpd: "M.Pd",
-  gr: "S.Pd.Gr",
-  dr: "Dr.",
-  drs: "Drs.",
-  h: "H.",
-  hj: "Hj."
-};
-
-/* ===============================
-   PARSE NAMA (PISAH GELAR)
+   PARSE NAMA (GELAR)
 ================================ */
 function parseNama(input) {
   const raw = input
-    .replace(/\./g, "")     // hapus titik
-    .replace(/,/g, "")      // hapus koma
+    .replace(/[.,]/g, "")
     .toLowerCase()
     .trim();
 
@@ -100,19 +82,14 @@ function parseNama(input) {
     else nama.push(p);
   });
 
-  const namaFix = nama
-    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-
   return {
-    nama: namaFix,
-    gelar: Array.from(gelarSet).join(", ")
+    nama: nama.map(w => w[0].toUpperCase() + w.slice(1)).join(" "),
+    gelar: [...gelarSet].join(", ")
   };
 }
 
-
 /* ===============================
-   GENERATE EMAIL & PASSWORD
+   GENERATE AKUN
 ================================ */
 function generateAkun(namaDasar) {
   const angka = Math.floor(10 + Math.random() * 90);
@@ -122,6 +99,14 @@ function generateAkun(namaDasar) {
     email: `${clean}${angka}@smp.belajar.id`,
     password: clean.slice(0, 4) + angka
   };
+}
+
+/* ===============================
+   TOTAL GURU
+================================ */
+function updateTotalGuru(data) {
+  document.getElementById("totalGuru").innerText =
+    "Total: " + data.length + " guru";
 }
 
 /* ===============================
@@ -135,17 +120,16 @@ window.tambahGuru = async () => {
   const mapel  = formatMapel(mapelInput.value);
   const akun   = generateAkun(parsed.nama);
 
-await setDoc(doc(db, "guru", akun.email), {
-  nama: parsed.nama,      // TANPA GELAR
-  gelar: parsed.gelar,    // SUDAH BERSIH
-  mapel,
-  email: akun.email,
-  password: akun.password,
-  aktif: false,
-  createdAt: new Date(),
-  deletedAt: null
-});
-
+  await setDoc(doc(db, "guru", akun.email), {
+    nama: parsed.nama,
+    gelar: parsed.gelar,
+    mapel,
+    email: akun.email,
+    password: akun.password,
+    aktif: false,
+    createdAt: new Date(),
+    deletedAt: null
+  });
 
   namaInput.value = "";
   mapelInput.value = "";
@@ -154,7 +138,7 @@ await setDoc(doc(db, "guru", akun.email), {
 };
 
 /* ===============================
-   AKTIFKAN AKUN GURU
+   AKTIFKAN GURU
 ================================ */
 window.aktifkanGuru = async (id, btn) => {
   setLoading(btn, true);
@@ -162,19 +146,18 @@ window.aktifkanGuru = async (id, btn) => {
   try {
     const ref = doc(db, "guru", id);
     const snap = await getDoc(ref);
-    if (!snap.exists()) throw "Data guru tidak ditemukan";
 
+    if (!snap.exists()) throw "Data guru tidak ditemukan";
     const g = snap.data();
+
     if (g.aktif) throw "Akun sudah aktif";
 
-    // 1️⃣ BUAT AUTH
     const cred = await createUserWithEmailAndPassword(
       secondaryAuth,
       g.email,
       g.password
     );
 
-    // 2️⃣ SIMPAN USERS (ROLE GURU)
     await setDoc(doc(db, "users", cred.user.uid), {
       uid: cred.user.uid,
       nama: g.nama,
@@ -183,14 +166,11 @@ window.aktifkanGuru = async (id, btn) => {
       createdAt: new Date()
     });
 
-    // 3️⃣ UPDATE GURU
-    await updateDoc(ref, {
-      aktif: true,
-      deletedAt: null
-    });
+    await updateDoc(ref, { aktif: true, deletedAt: null });
 
     await signOut(secondaryAuth);
     alert("Akun guru berhasil diaktifkan ✅");
+
     loadGuru();
 
   } catch (err) {
@@ -199,7 +179,7 @@ window.aktifkanGuru = async (id, btn) => {
 };
 
 /* ===============================
-   NONAKTIFKAN AKUN GURU
+   NONAKTIFKAN GURU
 ================================ */
 window.nonaktifkanGuru = async (id, btn) => {
   if (!confirm("Nonaktifkan akun guru ini?")) return;
@@ -209,21 +189,18 @@ window.nonaktifkanGuru = async (id, btn) => {
   try {
     const ref = doc(db, "guru", id);
     const snap = await getDoc(ref);
-    if (!snap.exists()) throw "Data guru tidak ditemukan";
 
+    if (!snap.exists()) throw "Data guru tidak ditemukan";
     const g = snap.data();
 
-    // 1️⃣ LOGIN AUTH
     const cred = await signInWithEmailAndPassword(
       secondaryAuth,
       g.email,
       g.password
     );
 
-    // 2️⃣ HAPUS AUTH
     await deleteUser(cred.user);
 
-    // 3️⃣ HAPUS USERS
     const usersSnap = await getDocs(collection(db, "users"));
     for (const d of usersSnap.docs) {
       if (d.data().email === g.email) {
@@ -231,7 +208,6 @@ window.nonaktifkanGuru = async (id, btn) => {
       }
     }
 
-    // 4️⃣ UPDATE GURU
     await updateDoc(ref, {
       aktif: false,
       deletedAt: new Date()
@@ -239,6 +215,7 @@ window.nonaktifkanGuru = async (id, btn) => {
 
     await signOut(secondaryAuth);
     alert("Akun guru dinonaktifkan 🗑️");
+
     loadGuru();
 
   } catch (err) {
@@ -247,46 +224,50 @@ window.nonaktifkanGuru = async (id, btn) => {
 };
 
 /* ===============================
-   LOAD DATA GURU
+   LOAD DATA
 ================================ */
 async function loadGuru() {
   const snap = await getDocs(collection(db, "guru"));
   const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
+  // 🔥 FILTER DULU
+  const filtered = data
+    .filter(g => !g.deletedAt || g.aktif)
+    .sort((a, b) => a.nama.localeCompare(b.nama));
+
+  // 🔥 UPDATE TOTAL (BENAR)
+  updateTotalGuru(filtered);
+
   list.innerHTML = "";
 
-  data
-    .filter(g => !g.deletedAt || g.aktif)
-    .sort((a, b) => a.nama.localeCompare(b.nama))
-    .forEach((g, i) => {
-      list.innerHTML += `
-  <tr>
-    <td>${i + 1}</td>
-    <td>${g.nama}${g.gelar ? ", " + g.gelar : ""}</td>
-    <td>${g.mapel}</td>
-    <td>${g.email}</td>
-    <td>${g.password ?? "-"}</td>
-    <td>
-      ${g.aktif ? "✅ Aktif" : "❌ Nonaktif"}
-    </td>
-    <td>
-      ${
-        g.aktif
-          ? `<button data-label="Nonaktifkan"
-               onclick="nonaktifkanGuru('${g.id}', this)">
-               Nonaktifkan
-             </button>`
-          : `<button data-label="Aktifkan"
-               onclick="aktifkanGuru('${g.id}', this)">
-               Aktifkan
-             </button>`
-      }
-    </td>
-  </tr>
-`;
-
-    });
+  filtered.forEach((g, i) => {
+    list.innerHTML += `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${g.nama}${g.gelar ? ", " + g.gelar : ""}</td>
+        <td>${g.mapel}</td>
+        <td>${g.email}</td>
+        <td>${g.password ?? "-"}</td>
+        <td>${g.aktif ? "✅ Aktif" : "❌ Nonaktif"}</td>
+        <td>
+          ${
+            g.aktif
+              ? `<button data-label="Nonaktifkan"
+                   onclick="nonaktifkanGuru('${g.id}', this)">
+                   Nonaktifkan
+                 </button>`
+              : `<button data-label="Aktifkan"
+                   onclick="aktifkanGuru('${g.id}', this)">
+                   Aktifkan
+                 </button>`
+          }
+        </td>
+      </tr>
+    `;
+  });
 }
 
-
+/* ===============================
+   INIT
+================================ */
 loadGuru();

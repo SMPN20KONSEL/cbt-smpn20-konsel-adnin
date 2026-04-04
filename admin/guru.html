@@ -4,14 +4,18 @@
   <meta charset="UTF-8">
   <title>Data Guru</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="../assets/css/admin.css">
   <link rel="stylesheet" href="../assets/css/guru.css">
 
+  <!-- ICON -->
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
+
 <body>
 
+<!-- TOPBAR -->
 <header class="topbar">
   <div class="brand">
     <img src="../assets/img/logo-sekolah.png" class="brand-logo" alt="Logo Sekolah">
@@ -27,14 +31,11 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <h2><i class="fas fa-user-shield"></i> Admin</h2>
+
     <ul class="menu">
       <li><a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
       <li><a href="siswa.html"><i class="fa fa-users"></i> Data Siswa</a></li>
-      <li>
-        <a href="guru.html" class="active">
-          <i class="fa fa-chalkboard-teacher"></i> Data Guru
-        </a>
-      </li>
+      <li><a href="guru.html" class="active"><i class="fa fa-chalkboard-teacher"></i> Data Guru</a></li>
       <li><a href="bank-soal.html"><i class="fa fa-book"></i> Bank Soal</a></li>
       <li><a href="buat-soal.html"><i class="fa fa-pen"></i> Buat Soal</a></li>
       <li><a href="kartu-ujian.html"><i class="fa fa-id-card"></i> Kartu Ujian</a></li>
@@ -55,28 +56,26 @@
     <!-- FORM TAMBAH GURU -->
     <div class="card">
       <h3>Tambah Guru</h3>
+
       <div class="form-grid">
-        <input
-          id="nama"
-          placeholder="Nama Guru (contoh: komang winastiyana spd gr)"
-        >
-        <input
-          id="mapel"
-          placeholder="Mata Pelajaran (contoh: bahasa indonesia)"
-        >
+        <input id="nama" placeholder="Nama Guru (contoh: komang winastiyana spd gr)">
+        <input id="mapel" placeholder="Mata Pelajaran (contoh: bahasa indonesia)">
 
         <button id="btnTambah" class="btn secondary" onclick="tambahGuru()">
-  <span class="btn-icon">
-    <i class="fa fa-plus"></i>
-  </span>
-  <span id="textBtn">Tambah Guru</span>
-</button>
+          <span class="btn-icon"><i class="fa fa-plus"></i></span>
+          <span id="textBtn">Tambah Guru</span>
+        </button>
       </div>
     </div>
 
     <!-- LIST DATA GURU -->
     <div class="card">
+
+      <!-- TOTAL GURU -->
+      <span id="totalGuru" class="total-guru">Total: 0 guru</span>
+
       <h3>Daftar Guru</h3>
+
       <table class="table">
         <thead>
           <tr>
@@ -89,10 +88,10 @@
             <th>Aksi</th>
           </tr>
         </thead>
-        <tbody id="list">
-          <!-- DIISI OLEH guru.js -->
-        </tbody>
+
+        <tbody id="list"></tbody>
       </table>
+
     </div>
   </main>
 
