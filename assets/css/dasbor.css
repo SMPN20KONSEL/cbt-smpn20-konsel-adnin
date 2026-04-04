@@ -1,6 +1,4 @@
-/* =====================================================
-   RESET & DASAR
-===================================================== */
+/* ================= RESET ================= */
 *,
 *::before,
 *::after {
@@ -9,16 +7,7 @@
   padding: 0;
 }
 
-body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f4f6f9;
-  color: #1e293b;
-  min-height: 100vh;
-}
-
-/* =====================================================
-   VARIABEL GLOBAL
-===================================================== */
+/* ================= ROOT ================= */
 :root {
   --primary: #2563eb;
   --primary-dark: #1e40af;
@@ -34,9 +23,15 @@ body {
   --radius-md: 12px;
 }
 
-/* =====================================================
-   HEADER / TOPBAR
-===================================================== */
+/* ================= BODY ================= */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #333;
+  min-height: 100vh;
+}
+
+/* ================= TOPBAR ================= */
 .topbar {
   position: fixed;
   top: 0;
@@ -53,43 +48,15 @@ body {
 
   padding: 0 30px;
   z-index: 1000;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.brand-logo {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-}
-
-.brand-text strong {
-  display: block;
-  font-size: 15px;
-}
-
-.brand-text small {
-  font-size: 12px;
-  opacity: 0.85;
-}
-
-/* =====================================================
-   LAYOUT
-===================================================== */
+/* ================= LAYOUT ================= */
 .dashboard {
   display: flex;
   margin-top: 60px;
-  min-height: calc(100vh - 60px);
 }
 
-/* =====================================================
-   SIDEBAR
-===================================================== */
+/* ================= SIDEBAR ================= */
 .sidebar {
   position: fixed;
   top: 60px;
@@ -98,125 +65,66 @@ body {
   width: 260px;
   height: calc(100vh - 60px);
 
-  background: var(--bg-white);
-  padding: 25px 15px;
-
-  display: flex;
-  flex-direction: column;
-  box-shadow: 2px 0 6px rgba(0,0,0,0.08);
-}
-
-.sidebar h2 {
-  text-align: center;
-  margin-bottom: 30px;
-  font-size: 18px;
-}
-
-.menu {
-  list-style: none;
-  flex: 1;
-}
-
-.menu li {
-  margin-bottom: 10px;
+  background: white;
+  padding: 20px;
 }
 
 .menu a {
   display: flex;
-  align-items: center;
-  gap: 10px;
-
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-
+  padding: 10px;
+  border-radius: 10px;
   text-decoration: none;
-  color: var(--text-dark);
-  transition: 0.2s;
+  color: #333;
 }
 
-.menu a i {
-  font-size: 15px;
-}
-
-.menu a:hover,
-.menu a.active {
+.menu a:hover {
   background: #f3f4f6;
 }
 
-/* Logout */
-.logout {
-  background: var(--danger);
-  color: #fff;
-
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 10px;
-
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.logout i {
-  margin-right: 6px;
-}
-
-/* =====================================================
-   CONTENT
-===================================================== */
+/* ================= CONTENT ================= */
 .content {
   margin-left: 260px;
-  flex: 1;
-
-  padding: 40px;
-  background: var(--bg-content);
-
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  padding: 30px;
+  width: 100%;
 }
 
-/* Judul halaman */
-.content h1 {
-  text-align: center;
-  background: var(--primary);
-  color: #fff;
-
-  padding: 14px;
-  border-radius: 10px;
-  font-size: 22px;
-}
-
-/* Subjudul */
-.subtitle {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 14px;
-  margin-top: -10px;
-}
+/* ================= STATS ================= */
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
 }
 
-.stat-box {
-  background: #2a5298;
+.stat-card {
+  background: #3498db;
   color: white;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 15px;
   text-align: center;
 }
 
-.stat-box h2 {
-  font-size: 28px;
+/* ================= CARD ================= */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
 }
 
+.card-box {
+  background: white;
+  padding: 20px;
+  border-radius: 15px;
+  text-decoration: none;
+  color: #333;
+  text-align: center;
+}
+
+/* ================= MONITORING ================= */
 .monitoring {
   margin-top: 30px;
   background: white;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 15px;
 }
 
 .monitoring table {
@@ -224,297 +132,60 @@ body {
   border-collapse: collapse;
 }
 
-.monitoring th, .monitoring td {
+.monitoring th,
+.monitoring td {
   padding: 10px;
   border-bottom: 1px solid #ddd;
+}
+
+/* ================= STATUS ================= */
+.login {
+  color: blue;
+  font-weight: bold;
+}
+
+.belum {
+  color: orange;
+  font-weight: bold;
 }
 
 .aktif {
   color: green;
   font-weight: bold;
 }
-body {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  font-family: 'Poppins', sans-serif;
-  color: #333;
+
+.selesai {
+  color: gray;
+  font-weight: bold;
 }
 
-/* HEADER */
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: white;
-}
-
-/* STAT CARD */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin: 20px 0;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 20px;
-  border-radius: 15px;
-  color: white;
-  backdrop-filter: blur(10px);
-  transition: 0.3s;
-}
-
-.stat-card i {
-  font-size: 30px;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-}
-
-/* WARNA */
-.blue { background: #3498db; }
-.green { background: #2ecc71; }
-.orange { background: #f39c12; }
-.red { background: #e74c3c; }
-
-/* MENU */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-}
-
-.card-box {
-  background: white;
-  padding: 20px;
-  text-align: center;
-  border-radius: 15px;
-  text-decoration: none;
-  color: #333;
-  transition: 0.3s;
-}
-
-.card-box i {
-  font-size: 25px;
-  margin-bottom: 10px;
-}
-
-.card-box:hover {
-  transform: scale(1.05);
-  background: #2a5298;
-  color: white;
-}
-
-/* MONITORING */
-.monitoring {
-  margin-top: 30px;
-  background: white;
-  padding: 20px;
-  border-radius: 15px;
-}
-
-.monitoring table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.monitoring th, td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-}
-/* =====================================================
-   CARD DASHBOARD
-===================================================== */
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-}
-
-.card-box {
-  background: var(--bg-white);
-  padding: 20px;
-  border-radius: var(--radius-lg);
-
-  display: flex;
-  align-items: center;
-  gap: 18px;
-
-  text-decoration: none;
-  color: var(--text-dark);
-
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  transition: 0.25s;
-}
-
-.card-box i {
-  font-size: 36px;
-  color: var(--primary);
-  min-width: 42px;
-}
-
-.card-text h3 {
-  font-size: 18px;
-}
-
-.card-text p {
-  font-size: 14px;
-  color: var(--text-muted);
-}
-
-.card-box:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 14px 28px rgba(0,0,0,0.15);
-}
-
-/* Card utama */
-.card-box.highlight {
-  background: linear-gradient(135deg, #2563eb, #1e40af);
-  color: #fff;
-}
-
-.card-box.highlight i,
-.card-box.highlight p {
-  color: #fff;
-}
-
-/* =====================================================
-   CARD / FORM UMUM
-===================================================== */
-.card {
-  background: var(--bg-white);
-  padding: 20px;
-  border-radius: var(--radius-lg);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-.card label {
-  display: block;
-  margin-top: 12px;
-  font-weight: 600;
-}
-
-.card input,
-.card select {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-
-  border-radius: var(--radius-md);
-  border: 1px solid #d1d5db;
-}
-
-/* =====================================================
-   BUTTON GLOBAL (AMAN)
-===================================================== */
+/* ================= BUTTON ================= */
 .btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  padding: 10px 16px;
-  font-size: 14px;
-
+  padding: 10px 15px;
   border-radius: 6px;
   border: none;
   cursor: pointer;
 }
 
-.btn i {
-  font-size: 1em;
-  line-height: 1;
-}
-
 .btn.primary {
   background: var(--primary);
-  color: #fff;
-}
-
-.btn.primary:hover {
-  background: var(--primary-dark);
-}
-
-.btn.secondary {
-  background: #6b7280;
-  color: #fff;
+  color: white;
 }
 
 .btn.danger {
   background: var(--danger);
-  color: #fff;
+  color: white;
 }
 
-.btn.small {
-  padding: 6px 10px;
-  font-size: 13px;
-}
-
-/* =====================================================
-   TABLE
-===================================================== */
-.table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.table th {
-  background: var(--primary);
-  color: #fff;
-  padding: 12px;
-}
-
-.table td {
-  padding: 10px;
-  border: 1px solid #ddd;
-}
-
-.table tr:nth-child(even) {
-  background: #f2f2f2;
-}
-
-.table tr:hover {
-  background: #e0f2fe;
-}
-
-/* =====================================================
-   RESPONSIVE
-===================================================== */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
   .sidebar {
     position: relative;
     width: 100%;
     height: auto;
-    flex-direction: row;
-  }
-
-  .sidebar h2 {
-    display: none;
-  }
-
-  .menu {
-    display: flex;
-    overflow-x: auto;
   }
 
   .content {
     margin-left: 0;
-    padding: 20px;
-  }
-}
-
-@media (max-width: 576px) {
-  button,
-  input,
-  select {
-    width: 100%;
-  }
-
-  .card-box {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
