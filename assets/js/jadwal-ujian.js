@@ -92,10 +92,52 @@ async function buatUjian() {
 /* ================= LOAD JADWAL ================= */
 async function loadJadwal() {
   list.innerHTML = "";
+
   const snap = await getDocs(collection(db, "jadwal_ujian"));
 
-  snap.forEach(d => {
-    const u = d.data();
+  // 👉 ubah ke array dulu biar bisa di-sort
+  const data = [];
+  snap.forEach(d => data.push(d.data()));
+
+  // 👉 urutkan berdasarkan tanggal terbaru
+  data.sort((a, b) => {
+    if (!a.createdAt || !b.createdAt) return 0;
+    return b.createdAt.seconds - a.createdAt.seconds;
+  });
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  let lastTanggal = "";
+
+  data.forEach(u => {
+    if (!u.createdAt) return; // skip kalau belum ada timestamp
+
+    const tgl = u.createdAt.toDate();
+    const tglOnly = new Date(tgl);
+    tglOnly.setHours(0,0,0,0);
+
+    const formatTanggal = tglOnly.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
+    const isToday = tglOnly.getTime() === today.getTime();
+
+    // ✅ tampilkan tanggal hanya kalau bukan hari ini
+    if (!isToday && lastTanggal !== formatTanggal) {
+      list.innerHTML += `
+        <tr>
+          <td colspan="6" style="font-weight:bold; background:#f5f5f5;">
+            ${formatTanggal}
+          </td>
+        </tr>
+      `;
+      lastTanggal = formatTanggal;
+    }
+
+    // ✅ tampilkan data
     list.innerHTML += `
       <tr>
         <td>${u.judul}</td>
