@@ -2,11 +2,9 @@
 // ======================= FIREBASE =====================
 // ======================================================
 import { db } from "./firebase.js";
-
 import {
   doc,
   setDoc,
-  getDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
 
@@ -15,21 +13,18 @@ import {
 // ======================= ELEMENT ======================
 // ======================================================
 const daftarSoal = document.getElementById("daftarSoal");
+const btnSimpan  = document.getElementById("btnSimpan");
 const toastBox   = document.getElementById("toast");
 
 const judulUjian = document.getElementById("judulUjian");
 const mapelInput = document.getElementById("mapelInput");
 const kelasInput = document.getElementById("kelasInput");
 
-const btnSimpan  = document.getElementById("btnSimpan");
-
 
 // ======================================================
 // ======================== UTIL ========================
 // ======================================================
-function buatSoalId(prefix, nomor) {
-  return `${prefix}${nomor}`;
-}
+function huruf(i){ return String.fromCharCode(65+i); }
 
 function buatDocId(judul, mapel, kelas) {
   return `${judul}_${mapel}_${kelas}`
@@ -38,272 +33,64 @@ function buatDocId(judul, mapel, kelas) {
     .replace(/[^a-z0-9_]/g, "");
 }
 
-function bersihkanPertanyaan(text = "") {
-  return text
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/\s*\((pg|esai|essay|pilihan ganda)\)\s*$/i, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
 
 // ======================================================
 // ======================== TOAST =======================
 // ======================================================
-function toast(msg, type = "success") {
+function toast(msg, type="success"){
+  if(!toastBox) return;
+
   const div = document.createElement("div");
-  div.className = `toast-item toast-${type}`;
+  div.className = `toast-${type}`;
   div.innerText = msg;
 
   toastBox.appendChild(div);
-
-  setTimeout(() => {
-    div.style.opacity = "0";
-    div.style.transform = "translateY(-10px)";
-    setTimeout(() => div.remove(), 300);
-  }, 3000);
+  setTimeout(()=>div.remove(),3000);
 }
 
 
 // ======================================================
-// ======================= LOADING ======================
-// ======================================================
-function setLoading(btn, text = "⏳ Loading...") {
-  if (!btn) return;
-  btn.disabled = true;
-  btn.dataset.text = btn.innerHTML;
-  btn.innerHTML = text;
-}
-
-function stopLoading(btn) {
-  if (!btn) return;
-  btn.disabled = false;
-  btn.innerHTML = btn.dataset.text;
-}
-
-
-// ======================================================
-// ===================== TAMBAH SOAL ====================
-// ======================================================
-window.tambahSoal = (data = null) => {
-  const card = document.createElement("div");
-  card.className = "soal-card";
-  card.style.border = "1px solid #ccc";
-  card.style.padding = "15px";
-  card.style.marginBottom = "15px";
-  card.style.borderRadius = "10px";
-
-  card.innerHTML = `
-    <select class="tipe-soal">
-      <option value="pg">Pilihan Ganda</option>
-      <option value="esai">Esai</option>
-    </select>
-
-    <div class="pertanyaan" contenteditable style="margin-top:8px"></div>
-
-    ${data?.gambar ? `<img src="${data.gambar}" style="max-width:100%;margin:10px 0">` : ""}
-
-    <div class="pg-options" style="margin-top:8px">
-      ${["A","B","C","D"].map(l => `
-        <div style="display:flex; align-items:center; margin-bottom:6px;">
-          <b style="width:25px;">${l}.</b>
-          <span contenteditable class="opsi-input"
-            style="flex:1; border:1px solid #ccc; padding:6px; border-radius:6px; min-height:30px;">
-          </span>
-        </div>
-      `).join("")}
-
-      <select class="jawaban">
-        <option value="">Kunci Jawaban</option>
-        ${["A","B","C","D"].map(l => `<option>${l}</option>`).join("")}
-      </select>
-    </div>
-
-    <div style="margin-top:10px; display:flex; gap:10px;">
-      <button type="button" onclick="tambahSoalDiBawah(this)">➕ Tambah</button>
-      <button type="button" onclick="this.closest('.soal-card').remove()">🗑 Hapus</button>
-    </div>
-  `;
-
-  daftarSoal.appendChild(card);
-
-  const tipe  = card.querySelector(".tipe-soal");
-  const pgBox = card.querySelector(".pg-options");
-
-  tipe.onchange = () => {
-    pgBox.style.display = tipe.value === "pg" ? "block" : "none";
-  };
-
-  if (data) {
-    tipe.value = data.tipe;
-    card.querySelector(".pertanyaan").innerText =
-      bersihkanPertanyaan(data.pertanyaan || "");
-
-    if (data.tipe === "pg") {
-      const opsiEl = card.querySelectorAll(".opsi-input");
-      Object.entries(data.opsi || {}).forEach(([_, v], i) => {
-        if (opsiEl[i]) opsiEl[i].innerText = v;
-      });
-      card.querySelector(".jawaban").value = data.jawabanBenar || "";
-    }
-  }
-
-  tipe.dispatchEvent(new Event("change"));
-};
-
-
-// ======================================================
-// ================= TAMBAH DI BAWAH ====================
-// ======================================================
-window.tambahSoalDiBawah = (btn) => {
-  const cardLama = btn.closest(".soal-card");
-
-  const wrapper = document.createElement("div");
-  daftarSoal.appendChild(wrapper);
-
-  tambahSoal();
-
-  const cardBaru = daftarSoal.lastElementChild;
-  cardLama.after(cardBaru);
-};
-
-
-// ======================================================
-// ===================== IMPORT WORD ====================
-// ======================================================
-window.importWord = async (btn) => {
-  setLoading(btn, "📄 Importing...");
-  try {
-    const file = document.getElementById("fileWord").files[0];
-    if (!file) throw new Error("Pilih file Word (.docx)");
-
-    if (daftarSoal.children.length > 0) {
-      if (!confirm("Soal lama akan diganti. Lanjut?")) {
-        stopLoading(btn);
-        return;
-      }
-      daftarSoal.innerHTML = "";
-    }
-
-    const buffer = await file.arrayBuffer();
-
-    const result = await mammoth.convertToHtml(
-      { arrayBuffer: buffer },
-      {
-        convertImage: mammoth.images.inline(image => {
-          return image.read("base64").then(base64 => ({
-            src: `data:${image.contentType};base64,${base64}`
-          }));
-        })
-      }
-    );
-
-    parseSoalHtml(result.value);
-
-    toast("✅ Import Word berhasil");
-  } catch (err) {
-    toast("❌ " + err.message, "error");
-  } finally {
-    stopLoading(btn);
-  }
-};
-
-
-// ======================================================
-// ==================== PARSER WORD =====================
-// ======================================================
-function parseSoalHtml(html) {
-  const temp = document.createElement("div");
-  temp.innerHTML = html;
-
-  const paragraphs = temp.querySelectorAll("p");
-
-  let soal = null;
-
-  paragraphs.forEach(p => {
-    let text = p.innerText.trim();
-    if (!text) return;
-
-    // DETEKSI NOMOR SOAL
-    if (/^\d+[\.\)]/.test(text)) {
-      if (soal) tambahSoal(soal);
-
-      soal = {
-        tipe: "esai",
-        pertanyaan: "",
-        opsi: {},
-        jawabanBenar: "",
-        gambar: null
-      };
-
-      text = text.replace(/^\d+[\.\)]\s*/, "");
-    }
-
-    if (!soal) return;
-
-    // OPSI A-D
-    const opsiMatch = text.match(/^([A-D])[\.\)]\s*(.*)/i);
-    if (opsiMatch) {
-      soal.tipe = "pg";
-      soal.opsi[opsiMatch[1].toUpperCase()] =
-        bersihkanPertanyaan(opsiMatch[2]);
-      return;
-    }
-
-    // KUNCI
-    if (/KUNCI\s*:/i.test(text)) {
-      soal.jawabanBenar =
-        text.replace(/KUNCI\s*:/i, "").trim().toUpperCase();
-      return;
-    }
-
-    // PERTANYAAN
-    soal.pertanyaan += " " + bersihkanPertanyaan(text);
-  });
-
-  if (soal) tambahSoal(soal);
-}
-
-// ======================================================
-// ================= DOWNLOAD TEMPLATE ==================
+// ======================= TEMPLATE =====================
 // ======================================================
 window.downloadTemplate = async () => {
+  if (!window.docx) return alert("DOCX belum load!");
+
   const { Document, Packer, Paragraph } = window.docx;
 
-  const doc = new Document({
-    sections: [
-      {
-        children: [
-          new Paragraph("SOAL PILIHAN GANDA"),
-          new Paragraph(""),
+  const docFile = new Document({
+    sections: [{
+      children: [
+        new Paragraph("=== SOAL PG ==="),
+        new Paragraph("1. 2 + 2?"),
+        new Paragraph("A. 1"),
+        new Paragraph("B. 2"),
+        new Paragraph("C. 4"),
+        new Paragraph("D. 5"),
+        new Paragraph("KUNCI: C"),
 
-          new Paragraph("1. Berapakah 2 + 2? "),
-          new Paragraph("A. 1 "),
-          new Paragraph("B. 2 "),
-          new Paragraph("C. 4 "),
-          new Paragraph("D. 5 "),
-          new Paragraph("KUNCI: C"),
+        new Paragraph(""),
+        new Paragraph("=== SOAL MCMA ==="),
+        new Paragraph("2. Pilih yang benar"),
+        new Paragraph("A. 2 genap"),
+        new Paragraph("B. 3 genap"),
+        new Paragraph("C. 4 genap"),
+        new Paragraph("D. 5 genap"),
+        new Paragraph("KUNCI: A,C"),
 
-          new Paragraph(""),
-          new Paragraph("2. Ibu kota Indonesia adalah? "),
-          new Paragraph("A. Bandung "),
-          new Paragraph("B. Jakarta "),
-          new Paragraph("C. Surabaya "),
-          new Paragraph("D. Medan "),
-          new Paragraph("KUNCI: B"),
+        new Paragraph(""),
+        new Paragraph("=== SOAL KATEGORI ==="),
+        new Paragraph("3. Tentukan benar/salah"),
+        new Paragraph("a. 2+2=4 (Benar)"),
+        new Paragraph("b. 5x2=20 (Salah)"),
 
-          new Paragraph(""),
-          new Paragraph("SOAL ESAI"),
-          new Paragraph(""),
-
-          new Paragraph("3. Jelaskan arti kemerdekaan! "),
-          new Paragraph("4. Sebutkan 3 energi terbarukan! ")
-        ]
-      }
-    ]
+        new Paragraph(""),
+        new Paragraph("=== SOAL ESAI ==="),
+        new Paragraph("4. Jelaskan...")
+      ]
+    }]
   });
 
-  const blob = await Packer.toBlob(doc);
+  const blob = await Packer.toBlob(docFile);
   const url = URL.createObjectURL(blob);
 
   const a = document.createElement("a");
@@ -311,131 +98,438 @@ window.downloadTemplate = async () => {
   a.download = "Template_Soal.docx";
   a.click();
 
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  URL.revokeObjectURL(url);
 };
 
 
 // ======================================================
-// ===================== SIMPAN SEMUA ===================
+// ======================== IMPORT ======================
 // ======================================================
-window.simpanSemua = async () => {
-  setLoading(btnSimpan, "💾 Menyimpan...");
-  try {
+document.getElementById("fileImport")?.addEventListener("change", async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+
+  if(!window.mammoth){
+    alert("Library mammoth belum load!");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async function(event){
+    const result = await window.mammoth.convertToHtml({
+      arrayBuffer: event.target.result
+    });
+
+    parseSoalHtml(result.value);
+    toast("✅ Import berhasil");
+  };
+
+  reader.readAsArrayBuffer(file);
+});
+
+
+// ======================================================
+// ===================== PARSER =========================
+// ======================================================
+function parseSoalHtml(html){
+  const temp = document.createElement("div");
+  temp.innerHTML = html;
+
+  const lines = Array.from(temp.querySelectorAll("p"))
+    .map(p => p.innerText.trim())
+    .filter(x => x);
+
+  let soal=null;
+  let tipe="esai";
+
+  lines.forEach(line=>{
+
+    if(/SOAL PG KOMPLEKS|PG KOMPLEK|MCMA/i.test(line)){
+  tipe="mcma";
+  return;
+}
+
+if(/SOAL PG(?! KOMPLEKS)/i.test(line)){
+  tipe="pg";
+  return;
+}
+    if(/SOAL KATEGORI/i.test(line)){ tipe="kategori"; return; }
+    if(/SOAL ESAI/i.test(line)){ tipe="esai"; return; }
+
+    if(/^\d+\./.test(line)){
+      if(soal) renderSoal(soal);
+
+      soal = {
+        tipe,
+        pertanyaan: line.replace(/^\d+\.\s*/,""),
+        opsi:{},
+        jawabanBenar:[],
+        pernyataan:[]
+      };
+      return;
+    }
+
+    if(!soal) return;
+
+    let opsi = line.match(/^([A-D])\.\s*(.*)/);
+    if(opsi){
+      soal.opsi[opsi[1]] = opsi[2];
+      return;
+    }
+
+    if(/KUNCI/i.test(line)){
+      let kunci = line.replace(/KUNCI\s*:/i,"").trim();
+      soal.jawabanBenar = kunci.split(",").map(x=>x.trim());
+      return;
+    }
+
+    let kat = line.match(/^[a-z]\.\s*(.*?)\s*\((Benar|Salah)\)/i);
+    if(kat){
+      soal.pernyataan.push({
+        teks: kat[1],
+        jawabanBenar: kat[2].toLowerCase()==="benar"
+      });
+      return;
+    }
+
+    soal.pertanyaan += " " + line;
+  });
+console.log("TIPE TERDETEKSI:", tipe);
+  if(soal) renderSoal(soal);
+}
+
+
+// ======================================================
+// ===================== RENDER =========================
+// ======================================================
+function renderSoal(data){
+
+  tambahSoal();
+  const card = daftarSoal.lastElementChild;
+
+  const tipe = card.querySelector(".tipe-soal");
+  const pertanyaan = card.querySelector(".pertanyaan");
+
+  tipe.value = data.tipe;
+  pertanyaan.innerText = data.pertanyaan;
+  tipe.dispatchEvent(new Event("change"));
+
+  // ===== PG =====
+  if(data.tipe === "pg"){
+    const box = card.querySelector(".pg-options");
+    const kunci = card.querySelector(".jawaban");
+
+    box.innerHTML = "";
+    kunci.innerHTML = "";
+
+    Object.entries(data.opsi).forEach(([key,val])=>{
+      const row = document.createElement("div");
+      row.className = "opsi-row";
+
+      row.innerHTML = `
+        <b>${key}.</b>
+        <textarea class="opsi-text">${val}</textarea>
+      `;
+
+      box.appendChild(row);
+
+      const opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = key;
+      kunci.appendChild(opt);
+    });
+
+    kunci.value = data.jawabanBenar[0] || "";
+  }
+
+  // ===== MCMA =====
+  else if(data.tipe === "mcma"){
+    const box = card.querySelector(".mcma-options");
+    box.innerHTML = "";
+
+    Object.entries(data.opsi).forEach(([key,val])=>{
+      const checked = data.jawabanBenar.includes(key);
+
+      const row = document.createElement("div");
+      row.className = "opsi-row";
+
+      row.innerHTML = `
+        <b>${key}.</b>
+        <textarea class="opsi-text">${val}</textarea>
+        <input type="checkbox" value="${key}" ${checked ? "checked" : ""}>
+        <button class="hapus-opsi">✖</button>
+      `;
+
+      box.appendChild(row);
+    });
+  }
+
+  // ===== KATEGORI =====
+  else if(data.tipe === "kategori"){
+    const table = card.querySelector(".kategori-table");
+
+    table.innerHTML = `
+      <tr>
+        <th>Pernyataan</th>
+        <th>Benar</th>
+        <th>Salah</th>
+        <th></th>
+      </tr>
+    `;
+
+    data.pernyataan.forEach((p,i)=>{
+      const name = "kat_"+Date.now()+"_"+i;
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td><span contenteditable>${p.teks}</span></td>
+        <td><input type="radio" name="${name}" value="true" ${p.jawabanBenar ? "checked":""}></td>
+        <td><input type="radio" name="${name}" value="false" ${!p.jawabanBenar ? "checked":""}></td>
+        <td></td>
+      `;
+
+      table.appendChild(tr);
+    });
+  }
+}
+
+
+// ======================================================
+// ===================== TAMBAH SOAL ====================
+// ======================================================
+window.tambahSoal = () => {
+
+  const id = Date.now();
+
+  const card = document.createElement("div");
+  card.className = "soal-card";
+
+  card.innerHTML = `
+<select class="tipe-soal">
+  <option value="pg">Pilihan Ganda</option>
+  <option value="mcma">PG Kompleks</option>
+  <option value="kategori">Kategori</option>
+  <option value="esai">Esai</option>
+</select>
+
+<div class="pertanyaan" contenteditable></div>
+
+<div class="pg-options opsi-container"></div>
+<button class="btn-add-opsi">+ Opsi</button>
+<select class="jawaban"></select>
+
+<div class="mcma-options opsi-container" style="display:none"></div>
+<button class="btn-add-opsi-mcma" style="display:none">+ Opsi</button>
+
+<div class="kategori-options" style="display:none">
+  <table class="kategori-table">
+    <tr>
+      <th>Pernyataan</th>
+      <th>Benar</th>
+      <th>Salah</th>
+      <th></th>
+    </tr>
+  </table>
+</div>
+<button class="btn-add-kategori" style="display:none">+ Pernyataan</button>
+
+<div class="soal-actions">
+  <button onclick="tambahSoal()">➕ Tambah</button>
+  <button class="hapus">🗑 Hapus</button>
+</div>
+`;
+
+  daftarSoal.appendChild(card);
+
+  const tipe = card.querySelector(".tipe-soal");
+  const pgBox = card.querySelector(".pg-options");
+  const mcmaBox = card.querySelector(".mcma-options");
+  const katTable = card.querySelector(".kategori-table");
+
+  const btnAddPG = card.querySelector(".btn-add-opsi");
+  const btnAddMCMA = card.querySelector(".btn-add-opsi-mcma");
+  const btnAddKat = card.querySelector(".btn-add-kategori");
+
+  const kunciSelect = card.querySelector(".jawaban");
+
+  function tambahOpsi(container, isMCMA=false){
+    const i = container.children.length;
+    const label = huruf(i);
+
+    const row = document.createElement("div");
+    row.className = "opsi-row";
+
+    row.innerHTML = `
+      <b>${label}.</b>
+      <textarea class="opsi-text"></textarea>
+      ${isMCMA ? `<input type="checkbox" value="${label}">` : ""}
+      <button class="hapus-opsi">✖</button>
+    `;
+
+    container.appendChild(row);
+
+    if(!isMCMA){
+      const opt = document.createElement("option");
+      opt.value = label;
+      opt.textContent = label;
+      kunciSelect.appendChild(opt);
+    }
+
+    row.querySelector(".hapus-opsi").onclick = ()=>row.remove();
+  }
+
+  function tambahKategori(){
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td><span contenteditable></span></td>
+      <td><input type="radio" name="kat_${id}_${Date.now()}" value="true"></td>
+      <td><input type="radio" name="kat_${id}_${Date.now()}" value="false"></td>
+      <td><button>✖</button></td>
+    `;
+
+    tr.querySelector("button").onclick=()=>tr.remove();
+    katTable.appendChild(tr);
+  }
+
+  for(let i=0;i<4;i++){
+    tambahOpsi(pgBox);
+    tambahOpsi(mcmaBox,true);
+  }
+
+  for(let i=0;i<2;i++) tambahKategori();
+
+  btnAddPG.onclick = ()=>tambahOpsi(pgBox);
+  btnAddMCMA.onclick = ()=>tambahOpsi(mcmaBox,true);
+  btnAddKat.onclick = ()=>tambahKategori();
+
+  card.querySelector(".hapus").onclick = ()=>card.remove();
+
+  tipe.onchange = ()=>{
+    pgBox.style.display = tipe.value==="pg"?"block":"none";
+    mcmaBox.style.display = tipe.value==="mcma"?"block":"none";
+    katTable.parentElement.style.display = tipe.value==="kategori"?"block":"none";
+
+    btnAddPG.style.display = tipe.value==="pg"?"inline":"none";
+    btnAddMCMA.style.display = tipe.value==="mcma"?"inline":"none";
+    btnAddKat.style.display = tipe.value==="kategori"?"inline":"none";
+
+    kunciSelect.style.display = tipe.value==="pg"?"block":"none";
+  };
+};
+
+
+// ======================================================
+// ===================== AUTO RESIZE ====================
+// ======================================================
+document.addEventListener("input", function(e) {
+  if (e.target.classList.contains("opsi-text")) {
+    e.target.style.height = "auto";
+    e.target.style.height = e.target.scrollHeight + "px";
+  }
+});
+
+
+// ======================================================
+// ===================== SIMPAN =========================
+// ======================================================
+window.simpanSemua = async ()=>{
+  try{
     const judul = judulUjian.value.trim();
     const mapel = mapelInput.value.trim();
     const kelas = kelasInput.value.trim();
 
-    if (!judul || !mapel || !kelas) {
-      throw new Error("Judul, mapel, dan kelas wajib diisi");
+    if(!judul||!mapel||!kelas){
+      throw new Error("Data wajib diisi");
     }
 
-    const docId = buatDocId(judul, mapel, kelas);
-    const docRef = doc(db, "bank_soal", docId);
+    const soalPG=[], soalMCMA=[], soalKategori=[], soalEssay=[];
 
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      throw new Error("Soal sudah ada");
-    }
-
-    const soalPG = [];
-    const soalEssay = [];
-
-    document.querySelectorAll(".soal-card").forEach(card => {
+    document.querySelectorAll(".soal-card").forEach(card=>{
       const tipe = card.querySelector(".tipe-soal").value;
-      const pertanyaan = bersihkanPertanyaan(
-        card.querySelector(".pertanyaan").innerText
-      );
-      const gambar = card.querySelector("img")?.src || null;
+      const pertanyaan = card.querySelector(".pertanyaan").innerText.trim();
 
-      if (tipe === "pg") {
-        const opsi = {};
-        card.querySelectorAll(".opsi-input").forEach((o, i) => {
-          if (o.innerText.trim()) {
-            opsi[String.fromCharCode(65 + i)] = o.innerText.trim();
+      if(!pertanyaan) return;
+
+      if(tipe==="pg"){
+        const opsi={};
+
+        card.querySelectorAll(".pg-options .opsi-text").forEach((o,i)=>{
+          opsi[huruf(i)] = o.value.trim();
+        });
+
+        soalPG.push({
+          pertanyaan,
+          opsi,
+          jawabanBenar: card.querySelector(".jawaban").value
+        });
+      }
+
+      else if(tipe==="mcma"){
+        const opsi={}, kunci=[];
+
+        card.querySelectorAll(".mcma-options .opsi-text").forEach((o,i)=>{
+          opsi[huruf(i)] = o.value.trim();
+        });
+
+        card.querySelectorAll(".mcma-options input:checked").forEach(cb=>{
+          kunci.push(cb.value);
+        });
+
+        if(kunci.length===0){
+          throw new Error("MCMA wajib ada kunci");
+        }
+
+        soalMCMA.push({ pertanyaan, opsi, jawabanBenar:kunci });
+      }
+
+      else if(tipe==="kategori"){
+        const pernyataan=[];
+
+        card.querySelectorAll(".kategori-table tr").forEach((row,i)=>{
+          if(i===0) return;
+
+          const teks = row.querySelector("span")?.innerText.trim();
+          const checked = row.querySelector("input:checked");
+
+          if(teks){
+            pernyataan.push({
+              teks,
+              jawabanBenar: checked?.value === "true"
+            });
           }
         });
 
-        const kunci = card.querySelector(".jawaban").value;
-        if (!kunci) return;
+        soalKategori.push({ pertanyaan, pernyataan });
+      }
 
-        soalPG.push({
-          id: buatSoalId("PG", soalPG.length + 1),
-          pertanyaan,
-          gambar,
-          opsi,
-          jawabanBenar: kunci
-        });
-      } else {
-        if (!pertanyaan && !gambar) return;
-
-        soalEssay.push({
-          id: buatSoalId("E", soalEssay.length + 1),
-          pertanyaan,
-          gambar,
-          skorMax: 10
-        });
+      else{
+        soalEssay.push({ pertanyaan });
       }
     });
 
-    await setDoc(docRef, {
-      judul,
-      mapel,
-      kelas,
-      soalPG,
-      soalEssay,
+    const docId = buatDocId(judul,mapel,kelas);
+
+    await setDoc(doc(db,"bank_soal",docId),{
+      judul,mapel,kelas,
+      soalPG,soalMCMA,soalKategori,soalEssay,
       dibuat: serverTimestamp()
     });
 
-    toast("✅ Soal berhasil disimpan");
-    daftarSoal.innerHTML = "";
+    toast("✅ Berhasil simpan");
 
-  } catch (err) {
-    toast("❌ " + err.message, "error");
-  } finally {
-    stopLoading(btnSimpan);
+  }catch(err){
+    toast("❌ "+err.message,"error");
   }
 };
-window.previewSoal = () => {
-  const box = document.getElementById("previewBox");
-  const pgBox = document.getElementById("previewPG");
-  const esaiBox = document.getElementById("previewEsai");
 
-  box.style.display = "block";
-  pgBox.innerHTML = "";
-  esaiBox.innerHTML = "";
 
-  let noPG = 1;
-  let noE = 1;
-
-  document.querySelectorAll(".soal-card").forEach(card => {
-    const tipe = card.querySelector(".tipe-soal").value;
-    const pertanyaan = card.querySelector(".pertanyaan").innerText;
-    const gambar = card.querySelector("img")?.src;
-
-    if (tipe === "pg") {
-      let html = `<div><b>${noPG}. ${pertanyaan}</b>`;
-      if (gambar) html += `<br><img src="${gambar}" style="max-width:200px">`;
-
-      card.querySelectorAll(".opsi-input").forEach((o, i) => {
-        if (o.innerText.trim()) {
-          html += `<div>${String.fromCharCode(65+i)}. ${o.innerText}</div>`;
-        }
-      });
-
-      html += "</div><br>";
-      pgBox.innerHTML += html;
-      noPG++;
-    } else {
-      let html = `<div><b>${noE}. ${pertanyaan}</b>`;
-      if (gambar) html += `<br><img src="${gambar}" style="max-width:200px">`;
-      html += "</div><br>";
-
-      esaiBox.innerHTML += html;
-      noE++;
-    }
-  });
-};
-btnSimpan?.addEventListener("click", e => {
+// ======================================================
+// ===================== EVENT ==========================
+// ======================================================
+btnSimpan?.addEventListener("click",e=>{
   e.preventDefault();
   simpanSemua();
 });

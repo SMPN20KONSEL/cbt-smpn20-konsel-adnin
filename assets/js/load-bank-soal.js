@@ -45,37 +45,88 @@ async function loadSoal() {
     listEl.innerHTML = "";
     let no = 1;
 
-    // ================= PG =================
-    (data.soalPG || []).forEach((s) => {
-      let opsiHTML = "";
+// =====================================================
+// ================= PG =================
+(data.soalPG || []).forEach((s) => {
+  let opsiHTML = "";
 
-      if (s.opsi) {
-        for (const k in s.opsi) {
-          opsiHTML += `<div>${k}. ${s.opsi[k]}</div>`;
-        }
-      }
+  if (s.opsi) {
+    for (const k in s.opsi) {
+      opsiHTML += `<div>${k}. ${s.opsi[k]}</div>`;
+    }
+  }
 
-      listEl.innerHTML += `
-        <div class="soal-box">
-          <span class="jenis">Pilihan Ganda</span>
-          <div class="nomor">Soal ${no++}</div>
-          <div class="pertanyaan">${s.pertanyaan || ""}</div>
-          <div class="opsi">${opsiHTML}</div>
-          <small><b>Jawaban:</b> ${s.jawabanBenar || "-"}</small>
-        </div>
-      `;
-    });
+  listEl.innerHTML += `
+    <div class="soal-box">
+      <span class="jenis">Pilihan Ganda</span>
+      <div class="nomor">Soal ${no++}</div>
+      <div class="pertanyaan">${s.pertanyaan || ""}</div>
+      <div class="opsi">${opsiHTML}</div>
+      <small><b>Jawaban:</b> ${s.jawabanBenar || "-"}</small>
+    </div>
+  `;
+});
 
-    // ================= ESSAY =================
-    (data.soalEssay || []).forEach((s) => {
-      listEl.innerHTML += `
-        <div class="soal-box">
-          <span class="jenis" style="background:#16a34a">Esai</span>
-          <div class="nomor">Soal ${no++}</div>
-          <div class="pertanyaan">${s.pertanyaan || ""}</div>
-        </div>
-      `;
-    });
+
+// =====================================================
+// ================= MCMA =================
+(data.soalMCMA || []).forEach((s) => {
+  let opsiHTML = "";
+
+  if (s.opsi) {
+    for (const k in s.opsi) {
+      opsiHTML += `<div>[ ] ${k}. ${s.opsi[k]}</div>`;
+    }
+  }
+
+  listEl.innerHTML += `
+    <div class="soal-box">
+      <span class="jenis" style="background:#f59e0b">PG Kompleks</span>
+      <div class="nomor">Soal ${no++}</div>
+      <div class="pertanyaan">${s.pertanyaan || ""}</div>
+      <div class="opsi">${opsiHTML}</div>
+      <small><b>Jawaban:</b> ${(s.jawabanBenar || []).join(", ")}</small>
+    </div>
+  `;
+});
+
+
+// =====================================================
+// ================= KATEGORI =================
+(data.soalKategori || []).forEach((s) => {
+  let pernyataanHTML = "";
+
+  (s.pernyataan || []).forEach((p, i) => {
+    pernyataanHTML += `
+      <div>
+        ${i + 1}. ${p.teks}
+        <small>(Jawaban: ${p.jawabanBenar ? "Benar" : "Salah"})</small>
+      </div>
+    `;
+  });
+
+  listEl.innerHTML += `
+    <div class="soal-box">
+      <span class="jenis" style="background:#8b5cf6">Kategori</span>
+      <div class="nomor">Soal ${no++}</div>
+      <div class="pertanyaan">${s.pertanyaan || ""}</div>
+      <div class="opsi">${pernyataanHTML}</div>
+    </div>
+  `;
+});
+
+
+// =====================================================
+// ================= ESSAY =================
+(data.soalEssay || []).forEach((s) => {
+  listEl.innerHTML += `
+    <div class="soal-box">
+      <span class="jenis" style="background:#16a34a">Esai</span>
+      <div class="nomor">Soal ${no++}</div>
+      <div class="pertanyaan">${s.pertanyaan || ""}</div>
+    </div>
+  `;
+});
 
     // RENDER MATHJAX
     if (window.MathJax) MathJax.typeset();

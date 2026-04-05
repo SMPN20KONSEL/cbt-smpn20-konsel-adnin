@@ -65,56 +65,34 @@
 </head>
 
 <body>
-
-<!-- TOPBAR -->
 <header class="topbar">
-  <div class="brand">
-    <img src="../assets/img/logo-sekolah.png" class="brand-logo" alt="Logo Sekolah">
-    <div class="brand-text">
-      <strong>SMPN 20 KONAWE SELATAN</strong>
-      <small>CBT Application</small>
+    <div class="brand">
+      <img src="../assets/img/logo-sekolah.png" class="brand-logo" alt="Logo Sekolah">
+      <div class="brand-text">
+        <strong>SMPN 20 KONAWE SELATAN</strong>
+        <small>CBT Application</small>
+      </div>
     </div>
-  </div>
-</header>
-
+  </header>
 <div class="dashboard">
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <h2><i class="fa fa-chalkboard-teacher"></i> Guru</h2>
-
-    <ul class="menu">
-      <li>
-        <a href="dashboard-guru.html" class="active">
-          <i class="fa fa-home"></i> Dashboard
-        </a>
-      </li>
-      <li>
-        <a href="buat-soal.html">
-          <i class="fa fa-pen"></i> Buat Soal
-        </a>
-      </li>
-      <li>
-        <a href="bank-soal.html">
-          <i class="fa fa-book"></i> Bank Soal
-        </a>
-      </li>
-       <li>
-        <a href="koreksi-essay.html">
-          <i class="fa fa-book"></i> Koreksi Essay
-        </a>
-      </li>
-      <li>
-        <a href="rekap-nilai.html">
-          <i class="fa fa-chart-column"></i> Rekap Nilai
-        </a>
-      </li>
-    </ul>
-
-    <button class="logout" id="logout">
-      <i class="fas fa-sign-out-alt"></i> Logout
-    </button>
-  </aside>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <h2><i class="fas fa-user-shield"></i> Admin</h2>
+  <ul class="menu">
+    <li><a href="dashboard.html"><i class="fa fa-home"></i> Dashboard</a></li>
+    <li><a href="siswa.html"><i class="fa fa-users"></i> Data Siswa</a></li>
+    <li><a href="guru.html"><i class="fa fa-chalkboard-teacher"></i> Data Guru</a></li>
+    <li><a href="bank-soal.html" class="active"><i class="fa fa-book"></i> Bank Soal</a></li>
+    <li><a href="buat-soal.html"><i class="fa fa-pen"></i> Buat Soal</a></li>
+    <li><a href="kartu-ujian.html"><i class="fa fa-id-card"></i> Kartu Ujian</a></li>
+    <li><a href="ujian.html"><i class="fa fa-chart-bar"></i> Ruang Ujian</a></li>
+    <li><a href="nilai.html"><i class="fa fa-chart-bar"></i> Nilai</a></li>
+  </ul>
+  <button class="logout" id="logout">
+    <i class="fas fa-sign-out-alt"></i> Logout
+  </button>
+</aside>
 
 <!-- CONTENT -->
 <main class="content">
@@ -159,21 +137,44 @@ async function loadBankSoal() {
 
   list.innerHTML = "";
 
+  const labelMap = {
+    soalPG: "Pilihan Ganda",
+    soalMCMA: "PG Kompleks",
+    soalKategori: "Kategori",
+    soalEssay: "Esai"
+  };
+
   snap.forEach(docSnap => {
     const s = docSnap.data();
 
-    const jumlahPG = Array.isArray(s.soalPG) ? s.soalPG.length : 0;
-    const jumlahEsai = Array.isArray(s.soalEssay) ? s.soalEssay.length : 0;
-    const total = jumlahPG + jumlahEsai;
+    let total = 0;
+    let infoHTML = "";
+
+    Object.keys(labelMap).forEach(key => {
+      const arr = s[key];
+
+      if (Array.isArray(arr) && arr.length > 0) {
+        total += arr.length;
+
+        infoHTML += `
+          <div>
+            <i class="fa fa-list"></i>
+            ${labelMap[key]}: <b>${arr.length}</b>
+          </div>
+        `;
+      }
+    });
 
     list.innerHTML += `
       <div class="bank-card" onclick="lihatSoal('${docSnap.id}')">
         <div class="bank-header">
           <span class="badge">${s.mapel} • Kelas ${s.kelas}</span>
+
           <div class="actions" onclick="event.stopPropagation()">
             <button class="edit" onclick="editBankSoal('${docSnap.id}')">
               <i class="fa fa-edit"></i>
             </button>
+
             <button class="hapus" onclick="hapusBankSoal('${docSnap.id}')">
               <i class="fa fa-trash"></i>
             </button>
@@ -183,9 +184,7 @@ async function loadBankSoal() {
         <h3>${s.judul}</h3>
 
         <div class="soal-info">
-          <i class="fa fa-list"></i>
-          PG: <b>${jumlahPG}</b> |
-          Esai: <b>${jumlahEsai}</b>
+          ${infoHTML || "<i>Tidak ada soal</i>"}
         </div>
 
         <div class="total">

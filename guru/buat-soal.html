@@ -85,24 +85,25 @@
 
       <!-- ===== AKSI ===== -->
       <section class="form-section">
-       <div class="form-row">
+<div class="form-row">
 
-  <button type="button" class="btn" onclick="downloadTemplate()">
+  <button type="button" onclick="downloadTemplate()">
     ⬇️ Template Word
   </button>
 
-  <input type="file" id="fileWord" class="file-input"
-    accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+  <input type="file" id="fileImport"
+  style="display:none"
+  accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
 
-  <button type="button" class="btn" onclick="importWord(this)">
-    📥 Import Word
-  </button>
+<button type="button" onclick="document.getElementById('fileImport').click()">
+  📥 Import Word
+</button>
 
-  <button type="button" class="btn" onclick="tambahSoal()">
+  <button type="button" onclick="tambahSoal()">
     ➕ Tambah Soal
   </button>
 
-  <button type="button" class="btn" id="btnSimpan">
+  <button type="button" id="btnSimpan">
     💾 Simpan
   </button>
 
@@ -141,10 +142,12 @@
 <div id="toast"></div>
 
 <!-- ================= LIBRARY ================= -->
+<!-- MAMMOTH -->
 <script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
-<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
 
-<!-- ================= JS ================= -->
+<!-- DOCX -->
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<!-- ================= SCRIPT ================= -->
 <script type="module" src="../assets/js/buat-soal.js"></script>
 <script type="module" src="../assets/js/logout.js"></script>
 

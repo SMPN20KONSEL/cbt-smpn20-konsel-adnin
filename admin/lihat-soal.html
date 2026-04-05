@@ -25,15 +25,22 @@
       margin-bottom: 6px;
     }
 
+    /* 🔥 FIX: hilangkan duplikat */
     .jenis {
-      font-size: 12px;
-      background: #2563eb;
-      color: #fff;
-      padding: 3px 10px;
-      border-radius: 20px;
-      display: inline-block;
-      margin-bottom: 10px;
+      display:inline-block;
+      padding:4px 10px;
+      border-radius:20px;
+      font-size:12px;
+      color:#fff;
+      margin-bottom:10px;
+      background:#3b82f6;
     }
+
+    /* 🔥 WARNA TIPE SOAL */
+    .jenis.pg { background:#3b82f6; }
+    .jenis.mcma { background:#f59e0b; }
+    .jenis.kategori { background:#8b5cf6; }
+    .jenis.esai { background:#16a34a; }
 
     .opsi div {
       margin: 4px 0;
@@ -85,7 +92,7 @@
     <p id="info"></p>
 
     <div id="soal-list">
-      <!-- Soal akan dimuat dari Firestore -->
+      <!-- Soal dari Firestore -->
     </div>
   </main>
 

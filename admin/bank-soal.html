@@ -137,21 +137,44 @@ async function loadBankSoal() {
 
   list.innerHTML = "";
 
+  const labelMap = {
+    soalPG: "Pilihan Ganda",
+    soalMCMA: "PG Kompleks",
+    soalKategori: "Kategori",
+    soalEssay: "Esai"
+  };
+
   snap.forEach(docSnap => {
     const s = docSnap.data();
 
-    const jumlahPG = Array.isArray(s.soalPG) ? s.soalPG.length : 0;
-    const jumlahEsai = Array.isArray(s.soalEssay) ? s.soalEssay.length : 0;
-    const total = jumlahPG + jumlahEsai;
+    let total = 0;
+    let infoHTML = "";
+
+    Object.keys(labelMap).forEach(key => {
+      const arr = s[key];
+
+      if (Array.isArray(arr) && arr.length > 0) {
+        total += arr.length;
+
+        infoHTML += `
+          <div>
+            <i class="fa fa-list"></i>
+            ${labelMap[key]}: <b>${arr.length}</b>
+          </div>
+        `;
+      }
+    });
 
     list.innerHTML += `
       <div class="bank-card" onclick="lihatSoal('${docSnap.id}')">
         <div class="bank-header">
           <span class="badge">${s.mapel} • Kelas ${s.kelas}</span>
+
           <div class="actions" onclick="event.stopPropagation()">
             <button class="edit" onclick="editBankSoal('${docSnap.id}')">
               <i class="fa fa-edit"></i>
             </button>
+
             <button class="hapus" onclick="hapusBankSoal('${docSnap.id}')">
               <i class="fa fa-trash"></i>
             </button>
@@ -161,9 +184,7 @@ async function loadBankSoal() {
         <h3>${s.judul}</h3>
 
         <div class="soal-info">
-          <i class="fa fa-list"></i>
-          PG: <b>${jumlahPG}</b> |
-          Esai: <b>${jumlahEsai}</b>
+          ${infoHTML || "<i>Tidak ada soal</i>"}
         </div>
 
         <div class="total">

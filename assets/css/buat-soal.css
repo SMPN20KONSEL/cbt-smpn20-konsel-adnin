@@ -55,9 +55,11 @@ body {
   height: 60px;
   background: linear-gradient(135deg, #1e3c72, #2a5298);
   color: #fff;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   padding: 0 30px;
   z-index: 1000;
   box-shadow: 0 3px 10px rgba(0,0,0,0.1);
@@ -87,12 +89,12 @@ body {
 }
 
 /* =====================================================
-   DASHBOARD / LAYOUT
+   LAYOUT DASHBOARD
 ===================================================== */
 .dashboard {
   display: flex;
   min-height: 100vh;
-  margin-top: 60px; /* sesuai topbar */
+  margin-top: 60px;
 }
 
 /* =====================================================
@@ -102,13 +104,17 @@ body {
   position: fixed;
   top: 60px;
   left: 0;
+
   width: 260px;
   height: calc(100vh - 60px);
+
   background: #fff;
   padding: 25px 15px;
+
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+
   box-shadow: 2px 0 6px rgba(0,0,0,0.08);
   z-index: 900;
 }
@@ -119,7 +125,7 @@ body {
   color: var(--text-dark);
 }
 
-/* Menu sidebar */
+/* Menu */
 .menu {
   list-style: none;
   flex: 1;
@@ -132,10 +138,13 @@ body {
 .menu a {
   display: flex;
   align-items: center;
+
   padding: 10px 12px;
   border-radius: var(--radius-md);
+
   color: var(--text-dark);
   text-decoration: none;
+
   transition: 0.3s;
 }
 
@@ -148,7 +157,7 @@ body {
   background: #f3f4f6;
 }
 
-/* Logout Button */
+/* Logout */
 .logout {
   background: var(--danger);
   color: #fff;
@@ -157,26 +166,31 @@ body {
   border-radius: var(--radius-md);
   cursor: pointer;
 }
+
 /* =====================================================
    CONTENT AREA
 ===================================================== */
 .content {
   margin-left: 260px;
   flex: 1;
+
   padding: 40px;
   background: var(--bg-light);
+
   display: flex;
   flex-direction: column;
 }
 
 /* =====================================================
-   CONTAINER (CARD UTAMA)
+   CONTAINER (CARD)
 ===================================================== */
 .container {
   background: #fff;
   padding: 30px;
   border-radius: var(--radius-lg);
+
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -194,7 +208,7 @@ body {
 }
 
 /* =====================================================
-   FORM ROW
+   FORM
 ===================================================== */
 .form-row {
   display: flex;
@@ -215,8 +229,10 @@ body {
   flex: 1;
   min-width: 200px;
   padding: 10px 12px;
+
   border-radius: var(--radius-md);
   border: 1px solid #d1d5db;
+
   font-size: 14px;
 }
 
@@ -226,15 +242,17 @@ body {
 }
 
 /* =====================================================
-   BUTTON (GLOBAL CLEAN)
+   BUTTON
 ===================================================== */
 button {
   padding: 10px 14px;
   border-radius: var(--radius-md);
   border: none;
+
   cursor: pointer;
   background: var(--primary);
   color: #fff;
+
   font-size: 14px;
   font-weight: 600;
   transition: 0.2s;
@@ -254,13 +272,14 @@ button:hover {
 }
 
 /* =====================================================
-   TOAST (FIXED TOP CENTER)
+   TOAST
 ===================================================== */
 #toast {
   position: fixed;
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
+
   z-index: 9999;
 
   display: flex;
@@ -273,6 +292,7 @@ button:hover {
   border-radius: 8px;
   color: #fff;
   font-weight: 500;
+
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 
   opacity: 0;
@@ -280,11 +300,9 @@ button:hover {
   animation: toastIn 0.3s forwards;
 }
 
-/* warna */
 .toast-success { background: #16a34a; }
 .toast-error   { background: #dc2626; }
 
-/* animasi */
 @keyframes toastIn {
   to {
     opacity: 1;
@@ -321,7 +339,6 @@ button:hover {
   gap: 16px;
 }
 
-/* Card soal */
 .soal-card {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -339,11 +356,13 @@ button:hover {
 .soal-card textarea,
 .soal-card [contenteditable] {
   width: 100%;
-  min-height: 70px;
-  padding: 10px;
+ min-height: 36px;     /* 🔥 lebih pendek */
+  padding: 6px 10px;    /* 🔥 kecilin atas bawah */
   margin-top: 6px;
+
   border-radius: var(--radius-md);
   border: 1px solid #d1d5db;
+
   font-family: inherit;
 }
 
@@ -380,6 +399,243 @@ button:hover {
 
 .soal-actions .hapus:hover {
   background: #dc2626;
+}
+/* =====================================================
+   PG (PILIHAN GANDA) - FIX
+===================================================== */
+
+.pg-options .opsi-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 8px;
+  padding: 6px 8px;
+
+  border-radius: 8px;
+}
+
+/* hover */
+.pg-options .opsi-row:hover {
+  background: #f9fafb;
+}
+
+/* label */
+.pg-options .opsi-row b {
+  width: 30px;
+}
+
+/* input teks */
+.pg-options .opsi-text {
+  flex: 1;
+  width: 100%;
+  min-height: 36px;
+
+  padding: 6px 10px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+}
+
+/* tombol X */
+.pg-options .hapus-opsi {
+  margin-left: auto;   /* 🔥 dorong ke kanan */
+  background: #2a5298;
+  color: #fff;
+  border-radius: 8px;
+  padding: 5px 9px;
+  border: none;
+}
+/* =====================================================
+   PG KOMPLEKS (MCMA) - FIX FINAL
+===================================================== */
+
+/* 🔥 target spesifik */
+.mcma-options .opsi-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 8px;
+  padding: 6px 8px;
+
+  border-radius: 8px;
+}
+
+/* hover */
+.mcma-options .opsi-row:hover {
+  background: #f9fafb;
+}
+
+/* label */
+.mcma-options .opsi-row b {
+  width: 30px;
+}
+
+/* 🔥 textarea FULL */
+.mcma-options .opsi-text {
+  flex: 1;
+  width: 100%;       /* penting */
+  min-height: 36px;
+
+  padding: 6px 10px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+
+  resize: none;
+}
+
+/* 🔥 checkbox ke kanan */
+.mcma-options input[type="checkbox"] {
+  margin-left: auto;
+  transform: scale(1.2);
+}
+
+/* tombol hapus */
+.mcma-options .hapus-opsi {
+  margin-left: 8px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 8px;
+  padding: 5px 9px;
+  border: none;
+}
+.mcma-options .opsi-row {
+  display: flex !important;
+}
+
+.mcma-options .opsi-text {
+  flex: 1 !important;
+  width: 100% !important;
+}
+
+/* =====================================================
+   DROPDOWN JAWABAN (RAPI)
+===================================================== */
+
+.jawaban {
+  margin-top: 10px;
+  padding: 6px 10px;          /* 🔥 lebih ramping */
+  border-radius: var(--radius-md);
+  border: 1px solid #d1d5db;
+  width: 120px;               /* 🔥 tidak terlalu panjang */
+}
+
+/* =====================================================
+   KATEGORI (TABEL - FINAL FIX)
+===================================================== */
+
+/* container */
+.kategori-options {
+  margin-top: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-md);
+  padding: 12px;
+  background: #fff;
+}
+
+/* table */
+.kategori-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px; /* 🔥 jarak antar baris */
+}
+
+/* header */
+.kategori-table th {
+  font-size: 13px;
+  color: #666;
+  font-weight: 600;
+  text-align: center;
+  padding-bottom: 6px;
+}
+
+/* baris */
+.kategori-table tr {
+  background: transparent;
+}
+
+/* ===== KOLOM TEKS ===== */
+.kategori-table td:first-child {
+  width: 100%;
+  padding-right: 12px; /* 🔥 JARAK DARI RADIO */
+}
+
+.kategori-table td:first-child span {
+  display: block;
+  width: 100%;
+
+  min-height: 32px;       /* 🔥 tinggi kecil */
+  padding: 6px 10px;      /* 🔥 tidak terlalu tinggi */
+
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+
+/* ===== KOLOM RADIO ===== */
+.kategori-table td:nth-child(2),
+.kategori-table td:nth-child(3) {
+  width: 80px;            /* 🔥 lebih lega */
+  text-align: center;
+  padding-left: 10px;     /* 🔥 tidak mepet */
+}
+
+.kategori-table input[type="radio"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+/* ===== HEADER RADIO ===== */
+.kategori-table th:nth-child(2),
+.kategori-table th:nth-child(3) {
+  padding-left: 10px;
+}
+
+/* ===== KOLOM TOMBOL ===== */
+.kategori-table td:last-child {
+  width: 60px;
+  text-align: right;
+  padding-left: 10px;   /* 🔥 jarak dari radio */
+  padding-right: 8px;   /* 🔥 jarak dari pinggir kanan */
+}
+
+/* tombol hapus */
+.kategori-table button {
+  background: #2a5298;
+  color: #fff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
+  margin-left: 6px;     /* 🔥 biar gak nempel */
+}
+
+.kategori-table button:hover {
+  background: #1e3c72;
+}
+
+/* hover efek */
+.kategori-table tr:hover td:first-child span {
+  background: #f9fafb;
+}
+
+/* =====================================================
+   BUTTON TAMBAH
+===================================================== */
+.btn-add-opsi,
+.btn-add-opsi-mcma,
+.btn-add-kategori {
+  margin-top: 8px;
+  background: #e5e7eb;
+  color: #111;
+}
+
+.btn-add-opsi:hover,
+.btn-add-opsi-mcma:hover,
+.btn-add-kategori:hover {
+  background: #d1d5db;
 }
 
 /* =====================================================
@@ -420,4 +676,14 @@ button:hover {
   button {
     font-size: 13px;
   }
+}
+#daftarSoal {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 🔥 ini kunci */
+}
+
+.soal-card {
+  width: 100%;
+  max-width: 1200px; /* 🔥 batasi lebar */
 }
